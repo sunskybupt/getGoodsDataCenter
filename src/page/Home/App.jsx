@@ -1,11 +1,12 @@
 import React from 'react';
 import './App.css';
-import { Button } from 'antd';
+import { Button, Input } from 'antd';
 
 function App() {
   return (
     <div className="App">
     <Button>heheheh</Button>
+    <Input />
     </div>
   );
 }
