@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Upload, message } from 'antd';
+import { Form, Input, Button, Upload, message, InputNumber } from 'antd';
 import { Query, User } from 'leancloud-storage'
 
 
@@ -53,6 +53,9 @@ class AddGoods extends React.Component {
             </Form.Item>
             <Form.Item {...formItemLayout} label="商品关键词2" name="keywordTwo">
                 <Input />
+            </Form.Item>
+            <Form.Item {...formItemLayout} label="价格" name="price">
+                <InputNumber />
             </Form.Item>
             <Form.Item {...formItemLayout} label="商品大类" name="type">
                 <Input />
@@ -128,6 +131,7 @@ class AddGoods extends React.Component {
         todo.set('keywordOne', values.keywordOne);
         todo.set('keywordTwo', values.keywordTwo);
         todo.set('type', values.type);
+        todo.set('price', values.price);
         todo.set('rectCoverageImage', imageUrl);
         todo.set('ImageList', fileList.map((item) => (item.url)));
 
