@@ -49,8 +49,10 @@ class AddComment extends React.Component {
         endDateQuery.lessThan('createdAt', new Date(dateString[1]));
 
         const query = AV.Query.and(startDateQuery, endDateQuery)
+        query.equalTo('canHold', true);
         query.find().then((res) => {
             // students 是包含满足条件的 Student 对象的数组
+            console.log(111111111111,res)
             const peopleList = []
             const userList = res.map((item) => {
                 const resData = item._serverData
