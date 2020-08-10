@@ -4,6 +4,7 @@ import { Query, User } from 'leancloud-storage'
 import moment from 'moment'
 const { Option } = Select;
 const { TextArea } = Input;
+const { RangePicker } = DatePicker
 const formItemLayout = {
     style: {
       width: '100%',
@@ -27,28 +28,66 @@ class AddComment extends React.Component {
     peopleList: [],
     userList: [],
     uid: 0,
-    fileList: []
+    fileList: [],
+    goodsName: '',
+    goodsImg: '',
+    goodsProductID: ''
    }
 
     componentDidMount() {
         
-        const query = new AV.Query('getTreasurePeople');
+       
+    }
+
+    getUser(date, dateString) {
+        // console.log(date, dateString)
+
+        const startDateQuery = new AV.Query('getTreasurePeople');
+        startDateQuery.greaterThanOrEqualTo('createdAt', new Date(dateString[0]));
+
+        const endDateQuery = new AV.Query('getTreasurePeople');
+        endDateQuery.lessThan('createdAt', new Date(dateString[1]));
+
+        const query = AV.Query.and(startDateQuery, endDateQuery)
         query.find().then((res) => {
+            // students 是包含满足条件的 Student 对象的数组
             const peopleList = []
             const userList = res.map((item) => {
                 const resData = item._serverData
                 peopleList.push(resData)
                 // `${resData.activityID},${resData.nickName},${resData.userID},${resData.avatarUrl}`
                 return {
-                    key: resData.userID,
-                    value: resData.nickName
+                    userID: resData.userID,
+                    value: resData.nickName,
+                    activityID: resData.activityID, 
                 }
             })
             this.setState({
                 peopleList, 
                 userList
             })
+
+          });
+
+    }
+
+    changeUserID(e) {
+        const query = new AV.Query('getTreasureParticipator');
+        query.equalTo('objectId', e);
+        query.find().then((res) => {
+            let goodsProductID = res[0]._serverData.goodsProductID
+            const goods = new AV.Query('goodsProducts');
+            goods.equalTo('objectId', goodsProductID);
+            goods.find().then((res) => {
+                this.setState({
+                    goodsName: res[0]._serverData.title,
+                    goodsImg: res[0]._serverData.rectCoverageImage,
+                    goodsProductID,
+                    activityID: e
+                })
+            });
         });
+        
     }
 
     
@@ -61,18 +100,22 @@ class AddComment extends React.Component {
               <div className="ant-upload-text">Upload</div>
             </div>
           );
-          const { userList, fileList } = this.state;
+          const { userList, fileList, goodsName, goodsImg } = this.state;
       return (
      
         <Form onFinish={this.handleUpdate.bind(this)}>
-            <Form.Item {...formItemLayout} label="用户" name="userID">
-                <Select style={{ width: 120 }}>
+            <Form.Item {...formItemLayout} label="按时间范围筛选用户" name="aaa">
+                <RangePicker onChange={this.getUser.bind(this)} showTime />
+            </Form.Item>
+            <Form.Item {...formItemLayout} label="用户">
+                <Select style={{ width: 120 }} onChange={this.changeUserID.bind(this)}>
                     {
                         userList.map((item) => (
-                            <Option key={item.key} value={item.key}>{item.value}</Option>
+                            <Option key={item.activityID} value={item.activityID}>{item.value}</Option>
                         ))
                     }
                 </Select>
+                <span>{goodsName}<img style={{width: '200px', height: '200px'}} src={goodsImg} alt=""/></span>
             </Form.Item>
             <Form.Item {...formItemLayout} label="评价时间点" name="date">
                 <DatePicker />
@@ -122,27 +165,29 @@ class AddComment extends React.Component {
     }
 
     handleUpdate(values) {
-        const {fileList, peopleList} = this.state
+        const {fileList, peopleList, goodsProductID, activityID} = this.state
         const Todo = AV.Object.extend('getTreasureShowOff');
         // 构建对象
         // ${resData.activityID},${resData.nickName},${resData.userID},${resData.avatarUrl}
-        let productId = ''
+        let userID = ''
         let nickName = ''
         let avatarUrl = ''
         peopleList.map((item) => {
-
-            if (item.userID == values.userID) {
-                productId = item.activityID
+            if (item.activityID == activityID) {
+                console.log(item)
                 nickName = item.nickName
                 avatarUrl = item.avatarUrl
+                userID = item.userID
             }
         })
+        // const obj = peopleList.find((i) => (i.activityID == activityID))
+     
         const todo = new Todo();
-        todo.set('userID', values.userID);
+        todo.set('userID', userID);
         todo.set('date', Number(moment(values.date).format('YYYYMMDD')));
         todo.set('message', values.message);
         todo.set('commentImageList', fileList.map((item) => (item.url)));
-        todo.set('productID', productId);
+        todo.set('goodsProductID', goodsProductID);
         todo.set('nickName', nickName);
         avatarUrl && todo.set('avatarUrl', avatarUrl);
 
@@ -150,7 +195,9 @@ class AddComment extends React.Component {
         todo.save().then((res) => {
             // 成功保存之后，执行其他逻辑
             message.success('保存成功')
-            window.location.reload() 
+            setTimeout(() => {
+                window.location.reload() 
+            }, 800)
         }, (error) => {
             // 异常处理
             message.error('保存失败')

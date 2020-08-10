@@ -139,7 +139,9 @@ class AddGoods extends React.Component {
         todo.save().then((res) => {
         // 成功保存之后，执行其他逻辑
         message.success('保存成功')
-        window.location.reload() 
+        setTimeout(() => {
+            window.location.reload() 
+        }, 800)
         }, (error) => {
         // 异常处理
         });

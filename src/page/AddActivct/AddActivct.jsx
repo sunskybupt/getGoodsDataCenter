@@ -26,9 +26,11 @@ AV.init({
 
 class AddActivct extends React.Component {
     formRef = React.createRef(); 
-  state = {
-    goodsList: []
-   }
+    state = {
+        goodsList: [],
+        imgSrc: '',
+        allGoods: []
+    }
 
     componentDidMount() {
         
@@ -41,7 +43,8 @@ class AddActivct extends React.Component {
                 }
             })
             this.setState({
-                goodsList
+                goodsList,
+                allGoods: res
             })
         });
     }
@@ -50,29 +53,24 @@ class AddActivct extends React.Component {
 
 
     render() {
-        const { goodsList } = this.state;
+        const { goodsList, imgSrc } = this.state;
       return (
         <Form ref={this.formRef} onFinish={this.handleUpdate.bind(this)} >
-            <Form.Item {...formItemLayout} label="活动商品" name="productID">
-                <Select style={{ width: 120 }}>
+            <Form.Item {...formItemLayout} label="活动商品" name="goodsProductID">
+                <Select style={{ width: 120 }} onChange={this.changeGoodsProductID.bind(this)}>
                     {
                         goodsList.map((item) => (
                             <Option key={item.key} value={item.key}>{item.value}</Option>
                         ))
                     }
                 </Select>
+                <img style={{width: '200px', height: '200px'}} src={imgSrc} alt=""/>
             </Form.Item>
             <Form.Item {...formItemLayout} label="折扣" name="discount">
                 <InputNumber />
             </Form.Item>
             <Form.Item {...formItemLayout} label="商品活动数量" name="number">
                 <InputNumber />
-            </Form.Item>
-            <Form.Item {...formItemLayout} label="活动是否开启" name="openOrNot">
-                <Radio.Group>
-                    <Radio value={true}>是</Radio>
-                    <Radio value={false}>否</Radio>
-                </Radio.Group>
             </Form.Item>
             <Form.Item {...formItemLayout} label="活动日期" name="participateDate">
                 <DatePicker />
@@ -88,15 +86,24 @@ class AddActivct extends React.Component {
       );
     }
 
+
+    changeGoodsProductID(e) {
+        this.state.allGoods.map((item) => {
+            if (item.id == e) {
+                this.setState({
+                    imgSrc: item._serverData.rectCoverageImage
+                })
+            }
+        })
+    }
  
     handleUpdate(values) {
         const Todo = AV.Object.extend('getTreasureParticipator');
         // 构建对象
         const todo = new Todo();
-        todo.set('productID', values.productID);
+        todo.set('goodsProductID', values.goodsProductID);
         todo.set('number', values.number);
         todo.set('discount', values.discount);
-        todo.set('openOrNot', values.openOrNot);
         todo.set('participateDate', Number(moment(values.participateDate).format('YYYYMMDD')));
 
         // 将对象保存到云端
@@ -104,7 +111,9 @@ class AddActivct extends React.Component {
             // 成功保存之后，执行其他逻辑
             message.success('保存成功')
             // this.formRef.current.resetFields()
-            window.location.reload()  
+            setTimeout(() => {
+                window.location.reload() 
+            }, 800) 
 
         }, (error) => {
         // 异常处理
