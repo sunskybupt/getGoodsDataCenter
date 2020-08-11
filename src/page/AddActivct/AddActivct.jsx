@@ -56,7 +56,7 @@ class AddActivct extends React.Component {
         const { goodsList, imgSrc } = this.state;
       return (
         <Form ref={this.formRef} onFinish={this.handleUpdate.bind(this)} >
-            <Form.Item {...formItemLayout} label="活动商品" name="goodsProductID">
+            <Form.Item {...formItemLayout} label="活动商品">
                 <Select style={{ width: 120 }} onChange={this.changeGoodsProductID.bind(this)}>
                     {
                         goodsList.map((item) => (
@@ -91,7 +91,8 @@ class AddActivct extends React.Component {
         this.state.allGoods.map((item) => {
             if (item.id == e) {
                 this.setState({
-                    imgSrc: item._serverData.rectCoverageImage
+                    imgSrc: item._serverData.rectCoverageImage,
+                    goodsProductID: e
                 })
             }
         })
@@ -101,7 +102,7 @@ class AddActivct extends React.Component {
         const Todo = AV.Object.extend('getTreasureParticipator');
         // 构建对象
         const todo = new Todo();
-        todo.set('goodsProductID', values.goodsProductID);
+        todo.set('goodsProductID', this.state.goodsProductID);
         todo.set('number', values.number);
         todo.set('discount', values.discount);
         todo.set('participateDate', Number(moment(values.participateDate).format('YYYYMMDD')));

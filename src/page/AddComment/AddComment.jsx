@@ -52,11 +52,10 @@ class AddComment extends React.Component {
         query.equalTo('canHold', true);
         query.find().then((res) => {
             // students 是包含满足条件的 Student 对象的数组
-            console.log(111111111111,res)
             const peopleList = []
             const userList = res.map((item) => {
                 const resData = item._serverData
-                peopleList.push(resData)
+                peopleList.push({ id: item.id , ...resData})
                 // `${resData.activityID},${resData.nickName},${resData.userID},${resData.avatarUrl}`
                 return {
                     userID: resData.userID,
@@ -74,8 +73,10 @@ class AddComment extends React.Component {
     }
 
     changeUserID(e) {
+        const obj = this.state.peopleList.find((i) => (i.id == e))
+        console.log(obj)
         const query = new AV.Query('getTreasureParticipator');
-        query.equalTo('objectId', e);
+        query.equalTo('objectId', obj.activityID);
         query.find().then((res) => {
             let goodsProductID = res[0]._serverData.goodsProductID
             const goods = new AV.Query('goodsProducts');
@@ -85,7 +86,7 @@ class AddComment extends React.Component {
                     goodsName: res[0]._serverData.title,
                     goodsImg: res[0]._serverData.rectCoverageImage,
                     goodsProductID,
-                    activityID: e
+                    id: e
                 })
             });
         });
@@ -102,7 +103,7 @@ class AddComment extends React.Component {
               <div className="ant-upload-text">Upload</div>
             </div>
           );
-          const { userList, fileList, goodsName, goodsImg } = this.state;
+          const { peopleList, fileList, goodsName, goodsImg } = this.state;
       return (
      
         <Form onFinish={this.handleUpdate.bind(this)}>
@@ -112,8 +113,8 @@ class AddComment extends React.Component {
             <Form.Item {...formItemLayout} label="用户">
                 <Select style={{ width: 120 }} onChange={this.changeUserID.bind(this)}>
                     {
-                        userList.map((item) => (
-                            <Option key={item.activityID} value={item.activityID}>{item.value}</Option>
+                        peopleList.map((item) => (
+                            <Option key={item.id} value={item.id}>{item.nickName}</Option>
                         ))
                     }
                 </Select>
@@ -167,7 +168,7 @@ class AddComment extends React.Component {
     }
 
     handleUpdate(values) {
-        const {fileList, peopleList, goodsProductID, activityID} = this.state
+        const {fileList, peopleList, goodsProductID, id} = this.state
         const Todo = AV.Object.extend('getTreasureShowOff');
         // 构建对象
         // ${resData.activityID},${resData.nickName},${resData.userID},${resData.avatarUrl}
@@ -175,7 +176,7 @@ class AddComment extends React.Component {
         let nickName = ''
         let avatarUrl = ''
         peopleList.map((item) => {
-            if (item.activityID == activityID) {
+            if (item.id == id) {
                 console.log(item)
                 nickName = item.nickName
                 avatarUrl = item.avatarUrl
