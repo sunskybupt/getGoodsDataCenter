@@ -111,7 +111,7 @@ class AddComment extends React.Component {
                 <RangePicker onChange={this.getUser.bind(this)} showTime />
             </Form.Item>
             <Form.Item {...formItemLayout} label="用户">
-                <Select style={{ width: 120 }} onChange={this.changeUserID.bind(this)}>
+                <Select style={{ width: 500 }} onChange={this.changeUserID.bind(this)}>
                     {
                         peopleList.map((item) => (
                             <Option key={item.id} value={item.id}>{item.nickName}</Option>
