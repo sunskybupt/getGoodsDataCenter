@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './page/Home/App';
+import { HashRouter, Route, Link } from 'react-router-dom'
+import Login from './page/Login/Login'
+import Home from './page/Home/Home'
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  (<Home />),
   document.getElementById('root')
 );

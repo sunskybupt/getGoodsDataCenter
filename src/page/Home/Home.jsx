@@ -1,6 +1,11 @@
 import React from 'react';
-import './App.css';
+import './Home.css';
 import { Layout, Menu } from 'antd';
+import {
+    BrowserRouter as Router,
+    Route,
+    Link
+} from 'react-router-dom';
 import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
@@ -10,22 +15,27 @@ import {
 } from '@ant-design/icons';
 
 import Add from '../Add/Add'
+import GoodsList from '../GoodsList/GoodsList'
 
 
 const { Header, Sider, Content } = Layout;
 
 
 
-class App extends React.Component {
+class Home extends React.Component {
   
     render() {
       return (
+          <Router>
         <Layout style={{height: "100%"}}>
           <Sider trigger={null} collapsible >
             <div className="logo" />
             <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
-              <Menu.Item key="1" icon={<UserOutlined />}>
-                nav 1
+              <Menu.Item key="/home" icon={<UserOutlined />}>
+                <Link to="/">添加</Link>
+              </Menu.Item>
+              <Menu.Item key="/goodsList" icon={<UserOutlined />}>
+                <Link to="/goodsList">商品列表</Link>
               </Menu.Item>
             </Menu>
           </Sider>
@@ -41,13 +51,15 @@ class App extends React.Component {
                 height: '100%',
               }}
             >
-              <Add />
+               <Route exact path="/" component={Add} />
+               <Route path="/goodsList" component={GoodsList} />
             </Content>
           </Layout>
         </Layout>
+        </Router>
       );
     }
   }
   
 
-export default App;
+export default Home;
