@@ -26,89 +26,113 @@ class AddComment extends React.Component {
     formRef = React.createRef(); 
   state = {
     peopleList: [],
-    userList: [],
     uid: 0,
     fileList: [],
-    goodsName: '',
     goodsImg: '',
-    goodsProductID: ''
+    goodsProductID: '',
+    allActGoodsList: []
    }
 
     componentDidMount() {
-        
-       
+        // this.getActivct()       
     }
+    getActivct(date, dateString) {
+        this.setState({
+            allActGoodsList: []
+        })
+        const starTime = moment(dateString[0]).format('YYYY-MM-DD HH:mm:ss');
+        const endTime = moment(moment(dateString[1]).endOf('day')).format('YYYY-MM-DD HH:mm:ss')
+        const startDateQuery = new AV.Query('getTreasureParticipator');
+        startDateQuery.greaterThanOrEqualTo('createdAt', new Date(starTime));
 
-    getUser(date, dateString) {
-        // console.log(date, dateString)
-
-        const startDateQuery = new AV.Query('getTreasurePeople');
-        startDateQuery.greaterThanOrEqualTo('createdAt', new Date(dateString[0]));
-
-        const endDateQuery = new AV.Query('getTreasurePeople');
-        endDateQuery.lessThan('createdAt', new Date(dateString[1]));
+        const endDateQuery = new AV.Query('getTreasureParticipator');
+        endDateQuery.lessThan('createdAt', new Date(endTime));
 
         const query = AV.Query.and(startDateQuery, endDateQuery)
-        query.equalTo('canHold', true);
+        console.log(starTime, endTime)
         query.find().then((res) => {
-            // students 是包含满足条件的 Student 对象的数组
-            const peopleList = []
-            const userList = res.map((item) => {
-                const resData = item._serverData
-                peopleList.push({ id: item.id , ...resData})
-                // `${resData.activityID},${resData.nickName},${resData.userID},${resData.avatarUrl}`
+            const activityList = res.map((item) => {
                 return {
-                    userID: resData.userID,
-                    value: resData.nickName,
-                    activityID: resData.activityID, 
+                   acId: item.id,
+                   goodsProductID: item._serverData.goodsProductID
+
                 }
             })
-            this.setState({
-                peopleList, 
-                userList
+            
+            activityList.map((item) => {
+                const query = new AV.Query('goodsProducts');
+                query.equalTo('objectId', item.goodsProductID);
+                query.find().then((res) => {
+                    this.setState({
+                        allActGoodsList: [ ...this.state.allActGoodsList, {
+                            acId: item.acId,
+                            goodsProductID: item.goodsProductID,
+                            name: res[0]._serverData.title,
+                            url:  res[0]._serverData.rectCoverageImage,
+                        }]
+                    })
+                })
             })
-
-          });
-
+        })
     }
+
+
 
     changeUserID(e) {
-        const obj = this.state.peopleList.find((i) => (i.id == e))
-        console.log(obj)
-        const query = new AV.Query('getTreasureParticipator');
-        query.equalTo('objectId', obj.activityID);
-        query.find().then((res) => {
-            let goodsProductID = res[0]._serverData.goodsProductID
-            const goods = new AV.Query('goodsProducts');
-            goods.equalTo('objectId', goodsProductID);
-            goods.find().then((res) => {
-                this.setState({
-                    goodsName: res[0]._serverData.title,
-                    goodsImg: res[0]._serverData.rectCoverageImage,
-                    goodsProductID,
-                    id: e
-                })
-            });
-        });
-        
+      
+        this.setState({
+            id: e
+        })
     }
+changegoods(e) {
+    this.state.allActGoodsList.map((i) => {
+          
+        if (i.acId == e) {
+            this.setState({
+                goodsImg: i.url,
+                goodsProductID: i.goodsProductID
+            })
+        }
+    })
 
+    const query = new AV.Query('getTreasurePeople');
+    query.equalTo('activityID', e);
+    query.equalTo('canHold', true);
+    query.find().then((res) => {
+        const peopleList = res.map((item) => {
+            const resData = item._serverData
+           return { id: item.id , ...resData}
+        })
+        this.setState({
+            peopleList
+        })
+    })
+}
     
 
 
     render() {
         const uploadButton = (
             <div>
-              {/* {this.state.loading ? <LoadingOutlined /> : <PlusOutlined />} */}
               <div className="ant-upload-text">Upload</div>
             </div>
           );
-          const { peopleList, fileList, goodsName, goodsImg } = this.state;
+          const { peopleList, fileList, goodsImg, allActGoodsList } = this.state;
       return (
      
         <Form onFinish={this.handleUpdate.bind(this)}>
-            <Form.Item {...formItemLayout} label="按时间范围筛选用户" name="aaa">
-                <RangePicker onChange={this.getUser.bind(this)} showTime />
+            <Form.Item {...formItemLayout} label="按时间范围筛选活动" name="aaa">
+                <RangePicker onChange={this.getActivct.bind(this)} />
+            </Form.Item>
+            <Form.Item {...formItemLayout} label="活动">
+                <Select style={{ width: 500 }} onChange={this.changegoods.bind(this)}>
+                    {
+                        allActGoodsList.map((item) => (
+                            <Option key={item.acId} value={item.acId}>{item.name}</Option>
+                        ))
+                    }
+                </Select>
+                <span><img style={{width: '200px', height: '200px'}} src={goodsImg} alt=""/></span>
             </Form.Item>
             <Form.Item {...formItemLayout} label="用户">
                 <Select style={{ width: 500 }} onChange={this.changeUserID.bind(this)}>
@@ -118,7 +142,7 @@ class AddComment extends React.Component {
                         ))
                     }
                 </Select>
-                <span>{goodsName}<img style={{width: '200px', height: '200px'}} src={goodsImg} alt=""/></span>
+                
             </Form.Item>
             <Form.Item {...formItemLayout} label="评价时间点" name="date">
                 <DatePicker />
@@ -183,7 +207,6 @@ class AddComment extends React.Component {
                 userID = item.userID
             }
         })
-        // const obj = peopleList.find((i) => (i.activityID == activityID))
      
         const todo = new Todo();
         todo.set('userID', userID);

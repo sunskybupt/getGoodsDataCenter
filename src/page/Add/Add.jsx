@@ -2,9 +2,9 @@ import React from 'react';
 import './Add.css';
 import { Layout, Tabs } from 'antd';
 import { Query, User } from 'leancloud-storage'
-import AddGoods from '../AddGoods/AddGoods'
-import AddActivct from '../AddActivct/AddActivct'
-import AddComment from '../AddComment/AddComment'
+import AddGoods from './AddGoods/AddGoods'
+import AddActivct from './AddActivct/AddActivct'
+import AddComment from './AddComment/AddComment'
 
 
 const { TabPane } = Tabs;
