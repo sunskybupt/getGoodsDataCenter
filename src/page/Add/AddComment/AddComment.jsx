@@ -97,7 +97,7 @@ changegoods(e) {
 
     const query = new AV.Query('getTreasurePeople');
     query.equalTo('activityID', e);
-    query.equalTo('canHold', true);
+    query.equalTo('getOrNot', true);
     query.find().then((res) => {
         const peopleList = res.map((item) => {
             const resData = item._serverData
