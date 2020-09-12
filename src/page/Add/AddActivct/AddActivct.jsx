@@ -29,7 +29,8 @@ class AddActivct extends React.Component {
     state = {
         goodsList: [],
         imgSrc: '',
-        allGoods: []
+        allGoods: [],
+        goodsprice: ''
     }
 
     componentDidMount() {
@@ -39,7 +40,7 @@ class AddActivct extends React.Component {
             const goodsList = res.map((item) => {
                 return {
                     key: item.id,
-                    value: item._serverData.title
+                    value: item._serverData.title,
                 }
             })
             this.setState({
@@ -53,7 +54,7 @@ class AddActivct extends React.Component {
 
 
     render() {
-        const { goodsList, imgSrc } = this.state;
+        const { goodsList, imgSrc, goodsprice } = this.state;
       return (
         <Form ref={this.formRef} onFinish={this.handleUpdate.bind(this)} >
             <Form.Item {...formItemLayout} label="活动商品">
@@ -65,6 +66,7 @@ class AddActivct extends React.Component {
                     }
                 </Select>
                 <img style={{width: '200px', height: '200px'}} src={imgSrc} alt=""/>
+                <span>价格：{goodsprice}</span>
             </Form.Item>
             <Form.Item {...formItemLayout} label="折扣" name="discount">
                 <InputNumber />
@@ -92,6 +94,7 @@ class AddActivct extends React.Component {
             if (item.id == e) {
                 this.setState({
                     imgSrc: item._serverData.rectCoverageImage,
+                    goodsprice: item._serverData.price,
                     goodsProductID: e
                 })
             }
