@@ -30,7 +30,8 @@ class AddComment extends React.Component {
     fileList: [],
     goodsImg: '',
     goodsProductID: '',
-    allActGoodsList: []
+    allActGoodsList: [],
+    isPeapleArr: [],
    }
 
     componentDidMount() {
@@ -49,7 +50,6 @@ class AddComment extends React.Component {
         endDateQuery.lessThan('createdAt', new Date(endTime));
 
         const query = AV.Query.and(startDateQuery, endDateQuery)
-        console.log(starTime, endTime)
         query.find().then((res) => {
             const activityList = res.map((item) => {
                 return {
@@ -66,6 +66,7 @@ class AddComment extends React.Component {
                     this.setState({
                         allActGoodsList: [ ...this.state.allActGoodsList, {
                             acId: item.acId,
+                            goodsId: res[0].id,
                             goodsProductID: item.goodsProductID,
                             name: res[0]._serverData.title,
                             url:  res[0]._serverData.rectCoverageImage,
@@ -85,6 +86,7 @@ class AddComment extends React.Component {
         })
     }
 changegoods(e) {
+    const {allActGoodsList, isPeapleArr} = this.state
     this.state.allActGoodsList.map((i) => {
           
         if (i.acId == e) {
@@ -99,14 +101,33 @@ changegoods(e) {
     query.equalTo('activityID', e);
     query.equalTo('getOrNot', true);
     query.find().then((res) => {
+        const arr = []
         const peopleList = res.map((item) => {
             const resData = item._serverData
+            arr.push(resData.userID)
            return { id: item.id , ...resData}
         })
         this.setState({
             peopleList
         })
+        let findGoods = allActGoodsList.find((item) => item.acId == e)
+        let colorArr = []
+        arr.map((item) => {
+            const query1 = new AV.Query('getTreasureShowOff');
+            query1.equalTo('goodsProductID', findGoods.goodsId);
+            query1.equalTo('userID', item);
+            query1.find().then((res) => {
+                colorArr.push(res.length > 0 ? true : false)
+                this.setState({
+                    isPeapleArr: [...this.state.isPeapleArr, res.length > 0 ? true : false]
+                }, () =>{
+                })
+            })
+        })
+        
+        
     })
+    
 }
     
 
@@ -117,7 +138,7 @@ changegoods(e) {
               <div className="ant-upload-text">Upload</div>
             </div>
           );
-          const { peopleList, fileList, goodsImg, allActGoodsList } = this.state;
+          const { peopleList, fileList, goodsImg, allActGoodsList, isPeapleArr } = this.state;
       return (
      
         <Form onFinish={this.handleUpdate.bind(this)}>
@@ -137,8 +158,8 @@ changegoods(e) {
             <Form.Item {...formItemLayout} label="用户">
                 <Select style={{ width: 500 }} onChange={this.changeUserID.bind(this)}>
                     {
-                        peopleList.map((item) => (
-                            <Option key={item.id} value={item.id}>{item.nickName}</Option>
+                        peopleList.map((item, i) => (
+                            <Option key={item.id} value={item.id}><span style={{background: isPeapleArr[i] ? 'red' : '#fff'}}>{item.nickName}</span></Option>
                         ))
                     }
                 </Select>
@@ -201,7 +222,6 @@ changegoods(e) {
         let avatarUrl = ''
         peopleList.map((item) => {
             if (item.id == id) {
-                console.log(item)
                 nickName = item.nickName
                 avatarUrl = item.avatarUrl
                 userID = item.userID
