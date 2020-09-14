@@ -60,7 +60,7 @@ class AddActivct extends React.Component {
             <Form.Item {...formItemLayout} label="活动商品">
                 <Select style={{ width: '500px' }} onChange={this.changeGoodsProductID.bind(this)}>
                     {
-                        goodsList.map((item) => (
+                        goodsList.reverse().map((item) => (
                             <Option key={item.key} value={item.key}>{item.value}</Option>
                         ))
                     }

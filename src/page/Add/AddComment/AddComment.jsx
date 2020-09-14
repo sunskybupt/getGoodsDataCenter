@@ -108,7 +108,8 @@ changegoods(e) {
            return { id: item.id , ...resData}
         })
         this.setState({
-            peopleList
+            peopleList,
+            isPeapleArr: []
         })
         let findGoods = allActGoodsList.find((item) => item.acId == e)
         let colorArr = []
@@ -117,14 +118,16 @@ changegoods(e) {
             query1.equalTo('goodsProductID', findGoods.goodsId);
             query1.equalTo('userID', item);
             query1.find().then((res) => {
-                colorArr.push(res.length > 0 ? true : false)
+                console.log('res==>', res)
+                colorArr.push(res.length > 0 && res[0]._serverData.userID)
                 this.setState({
-                    isPeapleArr: [...this.state.isPeapleArr, res.length > 0 ? true : false]
+                    isPeapleArr: [...this.state.isPeapleArr, res.length > 0 && res[0]._serverData.userID]
                 }, () =>{
+                    console.log('this.state.isPeapleArr==>', this.state.isPeapleArr)
                 })
             })
         })
-        
+        console.log('colorArrd======', colorArr)
         
     })
     
@@ -139,6 +142,7 @@ changegoods(e) {
             </div>
           );
           const { peopleList, fileList, goodsImg, allActGoodsList, isPeapleArr } = this.state;
+          console.log('peopleListdasd-----', peopleList, isPeapleArr)
       return (
      
         <Form onFinish={this.handleUpdate.bind(this)}>
@@ -159,7 +163,11 @@ changegoods(e) {
                 <Select style={{ width: 500 }} onChange={this.changeUserID.bind(this)}>
                     {
                         peopleList.map((item, i) => (
-                            <Option key={item.id} value={item.id}><span style={{background: isPeapleArr[i] ? 'red' : '#fff'}}>{item.nickName}</span></Option>
+                            <Option key={item.id} value={item.id}>
+                                <span 
+                                style={{background: isPeapleArr.indexOf(item.userID) >= 0 ? 'red' : '#fff'}}>        {item.nickName}
+                                </span>
+                            </Option>
                         ))
                     }
                 </Select>
